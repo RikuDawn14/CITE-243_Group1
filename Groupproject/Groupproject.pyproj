@@ -22,8 +22,11 @@
   </PropertyGroup>
   <ItemGroup>
     <Compile Include="Groupproject.py" />
-    <Compile Include="modules\example_module.py" />
     <Compile Include="modules\init.py" />
+    <Compile Include="modules\vuln_scanner.py" />
+    <Compile Include="thread_worker.py" />
+    <Compile Include="modules\Vulnerabilitiy_Recommendations.py" />
+    <Compile Include="modules\Website_Scanner.py" />
     <Compile Include="steampunk_theme.py" />
   </ItemGroup>
   <ItemGroup>

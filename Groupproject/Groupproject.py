@@ -103,7 +103,6 @@ class MainWindow(QtWidgets.QMainWindow):
             self.module_list.setCurrentRow(0)
 
     def _reload_modules_clicked(self):
-        # For now, show simple info. Later you can implement a real reload.
         QtWidgets.QMessageBox.information(
             self,
             "Reload Modules",
@@ -116,7 +115,6 @@ class MainWindow(QtWidgets.QMainWindow):
 
         mod = self.modules[index]
 
-        # Lazy create widget
         if mod.name not in self.module_widgets:
             widget = mod.create_widget(self)
             self.module_widgets[mod.name] = widget
@@ -140,13 +138,18 @@ def discover_modules(modules_path: str) -> List[ModuleInfo]:
         return result
 
     for filename in os.listdir(modules_path):
-        if not filename.endswith(".py"):
+        base_name, ext = os.path.splitext(filename)
+        if ext != ".py":
+            continue
+
+        # Skip package init and any private helpers
+        if base_name in ("__init__", "init"):
             continue
         if filename.startswith("_"):
             continue
 
         file_path = os.path.join(modules_path, filename)
-        mod_name = f"nic_mod_{os.path.splitext(filename)[0]}"
+        mod_name = f"nic_mod_{base_name}"
 
         spec = importlib.util.spec_from_file_location(mod_name, file_path)
         if spec is None or spec.loader is None:
@@ -190,8 +193,6 @@ def discover_modules(modules_path: str) -> List[ModuleInfo]:
 
 def main():
     app = QtWidgets.QApplication(sys.argv)
-
-    # Apply global stylesheet
     app.setStyleSheet(theme.APP_STYLESHEET)
 
     modules_dir = os.path.join(os.path.dirname(__file__), "modules")
