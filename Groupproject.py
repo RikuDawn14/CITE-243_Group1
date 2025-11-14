@@ -41,15 +41,15 @@ class MainWindow(QtWidgets.QMainWindow):
         header_layout = QtWidgets.QHBoxLayout(header)
         header_layout.setContentsMargins(10, 6, 10, 6)
 
-        title_label = QtWidgets.QLabel("North Idaho Steampunk")
+        title_label = QtWidgets.QLabel("North Idaho College\nCITE 243 Group One")
         title_label.setObjectName("HeaderTitle")
 
-        subtitle_label = QtWidgets.QLabel("Module Console")
-        subtitle_label.setObjectName("HeaderSubtitle")
+        # subtitle_label = QtWidgets.QLabel("Module Console")
+        # subtitle_label.setObjectName("HeaderSubtitle")
 
         title_box = QtWidgets.QVBoxLayout()
         title_box.addWidget(title_label)
-        title_box.addWidget(subtitle_label)
+        # title_box.addWidget(subtitle_label)
         title_box.setSpacing(0)
 
         header_layout.addLayout(title_box)
@@ -128,8 +128,8 @@ def discover_modules(modules_path: str) -> List[ModuleInfo]:
     """
     Look for .py files in modules_path.
     Each module file should define:
-      - function get_metadata() -> dict with "name" and "description"
-      - function create_module(parent=None) -> QWidget
+    - function get_metadata() -> dict with "name" and "description"
+    - function create_module(parent=None) -> QWidget
     """
     result: List[ModuleInfo] = []
 
