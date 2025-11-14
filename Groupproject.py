@@ -128,8 +128,8 @@ def discover_modules(modules_path: str) -> List[ModuleInfo]:
     """
     Look for .py files in modules_path.
     Each module file should define:
-      - function get_metadata() -> dict with "name" and "description"
-      - function create_module(parent=None) -> QWidget
+    - function get_metadata() -> dict with "name" and "description"
+    - function create_module(parent=None) -> QWidget
     """
     result: List[ModuleInfo] = []
 
