@@ -49,3 +49,4 @@ thread.start()
 ```
 - Python was garbage collecting the local variable worker but Qt still needed it. Adding it to the `widget.thread_pool.append(thread)` allowed the variable to persist.
 - The reason it worked in debug was because debug kept the local variables longer allowing the program to run.
+- Created new release with this bug fix. `v0.1.1-alpha`
