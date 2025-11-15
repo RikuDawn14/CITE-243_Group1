@@ -12,97 +12,126 @@ def get_metadata():
         "description": "Scan site for broken links, images, and header tags."
     }
 
+### Function to check for all <a> tags and check status ###
 def scan_broken_links(url):
-    output = []
-    seen = set()
+    output = [] # broken links
+    seen = [] # good links
 
-    try:
+    try: # try to connect to the input webpage and return an error if unable
         base = requests.get(url, timeout=10)
     except Exception:
         return "Could not reach URL."
 
     soup = BeautifulSoup(base.text, "html.parser")
-    links = soup.find_all("a")
+    links = soup.find_all("a") # find all <a> tags
 
-    for link in links:
-        href = link.get("href")
+    for link in links: # for loop to check if <a> tag has a href attribute
+        href = link.get("href") # get the URL from the attribute
         if not href:
             continue
 
-        full = urljoin(url, href)
-        if full in seen:
+        full = urljoin(url, href) # join URL and href to get full URL
+        if full in seen: # if loop to create list of all URLs skipping to next link if not unique
             continue
-        seen.add(full)
+        seen.append(full)
 
-        try:
+        try: # try/except for if the URL does not load
             r = requests.get(full, timeout=10)
             if r.status_code >= 400:
                 output.append(f"Broken: {full} (Status {r.status_code})")
         except Exception:
             output.append(f"Broken: {full} (No response)")
 
-    if not output:
+    if not output: # if not errors print this
         return "No broken links found."
 
-    return "\n".join(output)
+    return "\n".join(output) # print this if there were errors found
 
+### Function to get URLs for images from webpage ###
 def scan_images(url):
-    output = []
-    seen = set()
+    output = [] # list of missing images
+    seen = [] # list of found image URLs
 
-    try:
+    try: # try to connect to the input webpage and return an error if unable
         base = requests.get(url, timeout=10)
     except Exception:
         return "Could not reach URL."
 
     soup = BeautifulSoup(base.text, "html.parser")
-    images = soup.find_all("img")
+    images = soup.find_all("img") # find all image tags
 
-    for img in images:
+    for img in images: # for loop to get the source information from the HTML
         src = img.get("src")
         if not src:
             continue
 
-        full = urljoin(url, src)
+        full = urljoin(url, src) # combine the url and the src info
         if full in seen:
             continue
-        seen.add(full)
+        seen.append(full) # add new full/src to list
 
-        try:
+        try: # try/except for if the full/src URL does not load
             r = requests.get(full, timeout=10)
             if r.status_code >= 400:
                 output.append(f"Missing image: {full} (Status {r.status_code})")
         except Exception:
             output.append(f"Missing image: {full} (No response)")
 
-    if not output:
-        return "No missing images found."
+    if not output: # if no missing images return this
+        return "No missing images.\nFound image URL's:\n" + "\n".join(seen)
+    # If there were missing images return this instead
+    return "Missing the following images:\n" + "\n".join(output) + "Found image URL's:\n" + "\n".join(seen)
 
-    return "\n".join(output)
-
-def scan_headers(url):
-    try:
+### Function to find H1-3 HTML headings and the text for those headings ###
+def scan_headings(url):
+    
+    try:# try to connect to the input webpage and return an error if unable
         r = requests.get(url, timeout=10)
     except Exception:
         return "Could not reach URL."
 
     soup = BeautifulSoup(r.text, "html.parser")
+    # Get all heading info for each heading type
+    h1_tags = soup.find_all("h1")
+    h2_tags = soup.find_all("h2")
+    h3_tags = soup.find_all("h3")
+    # Get number of each heading type
+    h1 = len(h1_tags)
+    h2 = len(h2_tags)
+    h3 = len(h3_tags)
 
-    h1 = len(soup.find_all("h1"))
-    h2 = len(soup.find_all("h2"))
-    h3 = len(soup.find_all("h3"))
-
-    out = []
+    out = [] # list of headings type and amount
     out.append(f"H1 count: {h1}")
     out.append(f"H2 count: {h2}")
     out.append(f"H3 count: {h3}")
 
     if h1 == 0:
         out.append("WARNING: No H1 tag found.")
+    elif h1 > 1:
+        out.append(f"WARNING: Multiple H1 tags found [{h1}]. Best practice is to use only one H1 per page.")
+    
+    if h1 > 0: # Extract and display H1 text
+        out.append("\nH1 Tags:")
+        for i, tag in enumerate(h1_tags, 1):
+            text = tag.get_text(strip=True)
+            out.append(f"  {i}. {text}")
+    
+    if h2 > 0: # Extract and display H2 text
+        out.append("\nH2 Tags:")
+        for i, tag in enumerate(h2_tags, 1):
+            text = tag.get_text(strip=True)
+            out.append(f"  {i}. {text}")
+    
+    if h3 > 0: # Extract and display H3 text
+        out.append("\nH3 Tags:")
+        for i, tag in enumerate(h3_tags, 1):
+            text = tag.get_text(strip=True)
+            out.append(f"  {i}. {text}")
 
     return "\n".join(out)
 
-def full_scan(url):
+### Function that combines all previous functions into one ###
+def scan_full(url):
     parts = []
     parts.append("=== Broken Links ===")
     parts.append(scan_broken_links(url))
@@ -121,7 +150,7 @@ def create_module(parent=None):
 
     # URL input
     row = QtWidgets.QHBoxLayout()
-    url_label = QtWidgets.QLabel("URL:")
+    url_label = QtWidgets.QLabel("Enter URL:")
     url_input = QtWidgets.QLineEdit()
     row.addWidget(url_label)
     row.addWidget(url_input)
@@ -131,7 +160,7 @@ def create_module(parent=None):
     btn_row = QtWidgets.QHBoxLayout()
     btn_links = QtWidgets.QPushButton("Scan Broken Links")
     btn_imgs = QtWidgets.QPushButton("Scan Images")
-    btn_headers = QtWidgets.QPushButton("Scan Headers")
+    btn_headers = QtWidgets.QPushButton("Scan Headings")
     btn_full = QtWidgets.QPushButton("Full Scan")
 
     btn_row.addWidget(btn_links)
@@ -156,7 +185,7 @@ def create_module(parent=None):
         else:
             url_to_use = url
 
-        results.setPlainText("Scanning...")
+        results.setPlainText("Scanning...\nThis may take a while.")
 
         worker = Worker(fn, url_to_use)
         thread = QtCore.QThread()
@@ -179,12 +208,17 @@ def create_module(parent=None):
 
     btn_links.clicked.connect(lambda: run_thread(scan_broken_links))
     btn_imgs.clicked.connect(lambda: run_thread(scan_images))
-    btn_headers.clicked.connect(lambda: run_thread(scan_headers))
-    btn_full.clicked.connect(lambda: run_thread(full_scan))
+    btn_headers.clicked.connect(lambda: run_thread(scan_headings))
+    btn_full.clicked.connect(lambda: run_thread(scan_full))
 
     return widget
 
 ### Used for testing functions within this file if run independent ###
+# comment out 'from thread_worker import Worker' before testing
 if __name__ == "__main__":
-    url = "https://www.nic.edu"
-    print(scan_broken_links(url))
+    url = "https://www.nic.edu" 
+    # uncomment desired function test
+    print(scan_images(url))
+    #print(scan_broken_links(url))
+    #print(scan_headings(url))
+    #print(scan_full(url))
