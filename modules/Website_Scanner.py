@@ -183,3 +183,8 @@ def create_module(parent=None):
     btn_full.clicked.connect(lambda: run_thread(full_scan))
 
     return widget
+
+### Used for testing functions within this file if run independent ###
+if __name__ == "__main__":
+    url = "https://www.nic.edu"
+    print(scan_broken_links(url))

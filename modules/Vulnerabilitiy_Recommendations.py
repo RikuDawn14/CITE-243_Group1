@@ -64,3 +64,8 @@ def create_module(parent=None):
     btn.clicked.connect(do_generate)
 
     return widget
+
+### Used for testing functions within this file if run independent ###
+if __name__ == "__main__":
+    scan = ("Port 80: OPEN, Port 443: OPEN, Port 21: OPEN, Port 22: OPEN, Port 3306: OPEN, Port 3389: OPEN, Port 8080: OPEN")
+    print(generate_recs(scan))

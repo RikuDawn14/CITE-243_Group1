@@ -172,3 +172,9 @@ def create_module(parent=None):
     full.clicked.connect(lambda: run_thread(full_scan))
 
     return widget
+
+### Used for testing functions within this file if run independent ###
+if __name__ == "__main__":
+    url = "https://www.nic.edu"
+    print(port_probe(url))
+
