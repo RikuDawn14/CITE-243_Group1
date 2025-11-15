@@ -1,5 +1,5 @@
 # Documentation from Matthew
-
+![profile pic](https://raw.githubusercontent.com/RikuDawn14/CITE243Python/refs/heads/main/wallpaper.png)
 ### Friday Nov 14, 2025 (1)
 - I cleaned up the repository and created the first release of the project `v0.1.0-alpha` 
 - I tested all modules individually for functionality and all returned results in line with expectations.
