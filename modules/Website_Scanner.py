@@ -4,7 +4,7 @@ from PySide6 import QtWidgets, QtCore
 from bs4 import BeautifulSoup
 import requests
 from urllib.parse import urljoin
-#from thread_worker import Worker
+from thread_worker import Worker
 
 def get_metadata():
     return {

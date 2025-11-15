@@ -5,7 +5,7 @@ import socket
 import ssl
 import requests
 from urllib.parse import urlparse
-#from thread_worker import Worker
+from thread_worker import Worker
 
 def get_metadata():
     return {
