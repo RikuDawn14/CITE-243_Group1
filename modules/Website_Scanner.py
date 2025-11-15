@@ -214,6 +214,7 @@ def create_module(parent=None):
     return widget
 
 ### Used for testing functions within this file if run independent ###
+# comment out 'from thread_worker import Worker' before testing
 if __name__ == "__main__":
     url = "https://www.nic.edu" 
     # uncomment desired function test
