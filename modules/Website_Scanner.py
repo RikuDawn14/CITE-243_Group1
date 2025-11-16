@@ -140,7 +140,7 @@ def scan_full(url):
     parts.append(scan_images(url))
     parts.append("")
     parts.append("=== Headers ===")
-    parts.append(scan_headers(url))
+    parts.append(scan_headings(url))
     return "\n".join(parts)
 
 def create_module(parent=None):
