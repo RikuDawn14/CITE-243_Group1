@@ -84,6 +84,12 @@ def port_probe(target):
     host = get_hostname(target)
     ports = [80, 443, 21, 22, 3306, 3389, 8080]
 
+    try:
+        r = requests.get(url, timeout=10)
+    except Exception:
+            return "Could not connect to server."
+
+
     out = []
     for p in ports:
         s = socket.socket()
