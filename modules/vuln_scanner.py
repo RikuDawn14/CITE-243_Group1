@@ -28,6 +28,8 @@ def get_hostname(target):
 
 def fingerprint_server(target, progress_callback=None):
     url = normalize_url(target)
+    if progress_callback:
+        progress_callback("Fetching page and analyzing server...\n")
     try:
         r = requests.get(url, timeout=10)
     except Exception:
@@ -61,7 +63,7 @@ def fingerprint_server(target, progress_callback=None):
 def ssl_check(target, progress_callback=None):
     host = get_hostname(target)
     if progress_callback:
-        progress_callback("Fetching page and analyzing headings...\n")
+        progress_callback("Fetching page and analyzing SSL Cert...\n")
 
     try:
         ctx = ssl.create_default_context()
@@ -85,6 +87,8 @@ def ssl_check(target, progress_callback=None):
 def port_probe(target, progress_callback=None):
     host = normalize_url(target)
     ports = [80, 443, 21, 22, 3306, 3389, 8080]
+    if progress_callback:
+        progress_callback("Fetching page and analyzing ports...\n")
 
     try:
         r = requests.get(host, timeout=10)
