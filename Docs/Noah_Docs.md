@@ -29,11 +29,12 @@ Tried google.com, it worked, but the resulting URL it says it checks is http://g
 When inputting a valid URL (youtube.com), I get "name 'scan_headers' is not defined" as the output. I tried Google.com and got the same thing. When I first press Full Scan with a good url, it does say Scanning... | This may take a while. It does this before the scan_headers output. I tried 1.1.1.1 and got the exact same output. Scanning... and then scan_headers is the result. 
 
 First output for web scan > full scan
-<img width="1095" height="722" alt="Image" src="https://github.com/user-attachments/assets/35937bc0-5987-4ebf-a31f-0d51931c5bd6" />
-
+<!--No_Progress-->
+![No Progress](Noah_Docs_Images/No_Progress.png)
 
 name 'scan_headers' is not defined pictured below
-<img width="1099" height="723" alt="Image" src="https://github.com/user-attachments/assets/e495a2d6-c14b-4879-8e86-d6c3715bc43f" />
+<!--Scan_Headers-->
+![Scan Headers](Noah_Docs_Images/Scan_Headers.png)
 
 
 These screen shots were taken about 5 seconds apart.
@@ -52,3 +53,69 @@ except Exception:
 ```
 
 **Matthew** also fixed the scan headers bug as well. That feature now works as expected. 
+
+# 11/18/25
+
+## More Testing
+
+###  Patch 5
+
+I just tried patch 5, and the vulnerability scanner doesn't work anymore. If I put in anything at all, I get the following:
+
+| Quick Scan                                                                  | SSL Check                                                          | Port Probe                                                          | Full Scan                                                          |
+|-----------------------------------------------------------------------------|--------------------------------------------------------------------|---------------------------------------------------------------------|--------------------------------------------------------------------|
+| fingerprint_server() got an unexpected keyword argument 'progress_callback' | ssl_check() got an unexpected keyword argument 'progress_callback' | port_probe() got an unexpected keyword argument 'progress_callback' | full_scan() got an unexpected keyword argument 'progress_callback' |
+
+I re-ran the requirements.txt incase there were any changes as well.
+
+### Website Scanner
+
+You are now able to see progress as the program checks through the different subdomains. This is a nice addition.
+
+
+# 11/20/25
+### Minor Formatting Bug
+There's a very minor formatting bug when there is a missing image. The 'status 404' message is butted right up against the 'Found image URL' message. There should be a space or newline between the two.
+  
+Image below:
+<!--Formatting-->
+![Formatting Screenshot](Noah_Docs_Images/Formatting.png)
+
+This also appears in the full scan output when an image is missing, as it calls the same function.
+
+### Bogus Directory Bug
+
+For both modules, if you put a valid domain name (google.com) but an invalid subdirectory (google.com/.,.asoea.a,f#%^*(@^#), the program will still run and return results. It would be better if it returned an error message saying the URL is invalid or could not be reached. Right now, it just runs and gives results as if the URL was valid, but it only looks at the top level domain even though the directory can't exist. This could simulate false positives if a user is trying to scan a specific directory that doesn't exist(easy typos return the exact same results).
+
+Image below:
+<!--Bogus Direcory-->
+![Bogus Directory](Noah_Docs_Images/Bogus_Directory.png)
+
+### Rapid Input Bug
+
+While spam clicking quick scan, it registers multiple inputs. For example, I spam clicked quick scan 3 times in a row, and it ran the scan 3 times, returning 3 sets of results. It would be better if it only registered the last click, or disabled the button while a scan is running. The output is the same for every scan, it just duplicates the results.
+
+Image below(notice the scrollbar):
+<!--Rapid_Input-->
+![Rapid Input](Noah_Docs_Images/Rapid_Input.png)
+
+I could get this to happen with the following buttons:
+#### Vulnerability Scanner
+Quick Scan\
+SSL Check\
+Port Probe\
+Full Scan
+#### Website Scanner
+
+Scan Broken Links\
+&nbsp;&nbsp;&nbsp;&nbsp;(*This was especially bad because I tried google.com, which has 17 links to check. It tried all 17 a total of 7 times. It was very slow*)
+Scan Images\
+Scan Headings\
+Full Scan (Website Scanner)\
+&nbsp;&nbsp;&nbsp;(*This was also especially bad because it ran all 3 scans multiple times. It was very slow as well.*)
+
+#### Conclusion for Rapid Input Bug
+It happens on every button in both modules. It would be best to disable the buttons while a scan is running to prevent this from happening.
+
+
+
