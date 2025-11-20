@@ -26,8 +26,10 @@ def get_hostname(target):
         return parsed.hostname
     return t
 
-def fingerprint_server(target):
+def fingerprint_server(target, progress_callback=None):
     url = normalize_url(target)
+    if progress_callback:
+        progress_callback("Fetching page and analyzing server...\n")
     try:
         r = requests.get(url, timeout=10)
     except Exception:
@@ -58,8 +60,10 @@ def fingerprint_server(target):
 
     return "\n".join(out)
 
-def ssl_check(target):
+def ssl_check(target, progress_callback=None):
     host = get_hostname(target)
+    if progress_callback:
+        progress_callback("Fetching page and analyzing SSL Cert...\n")
 
     try:
         ctx = ssl.create_default_context()
@@ -80,12 +84,14 @@ def ssl_check(target):
 
     return "\n".join(out)
 
-def port_probe(target):
-    host = get_hostname(target)
+def port_probe(target, progress_callback=None):
+    host = normalize_url(target)
     ports = [80, 443, 21, 22, 3306, 3389, 8080]
+    if progress_callback:
+        progress_callback("Fetching page and analyzing ports...\n")
 
     try:
-        r = requests.get(url, timeout=10)
+        r = requests.get(host, timeout=10)
     except Exception:
             return "Could not connect to server."
 
@@ -103,16 +109,16 @@ def port_probe(target):
 
     return "\n".join(out)
 
-def full_scan(target):
+def full_scan(target, progress_callback=None):
     return "\n".join([
         "=== Fingerprint ===",
-        fingerprint_server(target),
+        fingerprint_server(target, progress_callback=None),
         "",
         "=== SSL ===",
-        ssl_check(target),
+        ssl_check(target, progress_callback=None),
         "",
         "=== Ports ===",
-        port_probe(target)
+        port_probe(target, progress_callback=None)
     ])
 
 def create_module(parent=None):
@@ -158,14 +164,18 @@ def create_module(parent=None):
         thread = QtCore.QThread()
         worker.moveToThread(thread)
 
-        worker.finished.connect(out_box.setPlainText)
-        worker.error.connect(out_box.setPlainText)
+        worker.progress.connect(lambda msg: out_box.append(msg))
 
-        worker.finished.connect(thread.quit)
-        worker.error.connect(thread.quit)
+        worker.finished.connect(lambda msg: out_box.append(f"\n{'='*50}\nFINAL RESULTS:\n{'='*50}\n{msg}"))
+        worker.error.connect(lambda msg: out_box.append(f"\nERROR: {msg}"))
+        # worker.finished.connect(out_box.setPlainText)
+        # worker.error.connect(out_box.setPlainText)
 
-        thread.finished.connect(worker.deleteLater)
-        thread.finished.connect(thread.deleteLater)
+        # worker.finished.connect(thread.quit)
+        # worker.error.connect(thread.quit)
+
+        # thread.finished.connect(worker.deleteLater)
+        # thread.finished.connect(thread.deleteLater)
 
         thread.started.connect(worker.run)
 
@@ -182,10 +192,14 @@ def create_module(parent=None):
 ### Used for testing functions within this file if run independent ###
 # comment out 'from thread_worker import Worker' before testing
 if __name__ == "__main__":
-    url = "https://www.nic.edu"
+    target = "https://www.nic.edu"
     # uncomment desired function test
-    print(port_probe(url))
-    #print(fingerprint_server(url))
-    #print(ssl_check(url))
-    #print(full_scan(url))
-
+    # Simple progress callback for console testing
+    def print_progress(msg):
+        print(msg, end='')
+    
+    # Test with progress updates
+    #print(fingerprint_server(target, print_progress))
+    #print(ssl_check(target, print_progress))
+    print(port_probe(target, print_progress))
+    #print(full_scan(target, print_progress))
