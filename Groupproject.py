@@ -11,6 +11,10 @@ from PySide6 import QtCore, QtGui, QtWidgets
 import steampunk_theme as theme
 # poop
 
+import sys, os
+sys.path.append(os.path.dirname(sys.executable))
+
+
 
 @dataclass
 class ModuleInfo:
@@ -127,12 +131,15 @@ class MainWindow(QtWidgets.QMainWindow):
 
 def discover_modules(modules_path: str) -> List[ModuleInfo]:
     """
-    Look for .py files in modules_path.
-    Each module file should define:
-    - function get_metadata() -> dict with "name" and "description"
-    - function create_module(parent=None) -> QWidget
+    PyInstaller-safe module discovery.
+    Works in source mode and frozen EXE.
     """
     result: List[ModuleInfo] = []
+
+    # Fix for PyInstaller EXE
+    if hasattr(sys, "_MEIPASS"):
+        # Actual folder where PyInstaller unpacks modules
+        modules_path = os.path.join(sys._MEIPASS, "modules")
 
     if not os.path.isdir(modules_path):
         print(f"Modules folder not found: {modules_path}")
@@ -143,7 +150,6 @@ def discover_modules(modules_path: str) -> List[ModuleInfo]:
         if ext != ".py":
             continue
 
-        # Skip package init and any private helpers
         if base_name in ("__init__", "init"):
             continue
         if filename.startswith("_"):
@@ -153,12 +159,12 @@ def discover_modules(modules_path: str) -> List[ModuleInfo]:
         mod_name = f"nic_mod_{base_name}"
 
         spec = importlib.util.spec_from_file_location(mod_name, file_path)
-        if spec is None or spec.loader is None:
+        if not spec or not spec.loader:
             continue
 
         module = importlib.util.module_from_spec(spec)
         try:
-            spec.loader.exec_module(module)  # type: ignore[attr-defined]
+            spec.loader.exec_module(module)
         except Exception as exc:
             print(f"Failed to load module {filename}: {exc}")
             continue
@@ -167,9 +173,7 @@ def discover_modules(modules_path: str) -> List[ModuleInfo]:
         create_module_func = getattr(module, "create_module", None)
 
         if not callable(get_metadata) or not callable(create_module_func):
-            print(
-                f"Module {filename} does not provide get_metadata() and create_module()."
-            )
+            print(f"Module {filename} missing required functions.")
             continue
 
         try:
@@ -180,16 +184,11 @@ def discover_modules(modules_path: str) -> List[ModuleInfo]:
             print(f"Error reading metadata from {filename}: {exc}")
             continue
 
-        result.append(
-            ModuleInfo(
-                name=name,
-                description=description,
-                create_widget=create_module_func,
-            )
-        )
+        result.append(ModuleInfo(name, description, create_module_func))
 
     result.sort(key=lambda m: m.name.lower())
     return result
+
 
 
 def main():
