@@ -119,4 +119,4 @@ Did the general testing. Found some bugs and opened issues on those bugs, as wel
 
 
 ### Matthew - Dev 2
-
+See my [Docs](https://github.com/RikuDawn14/CITE_243_Group1/blob/main/Docs/Matthew_Docs.md)
